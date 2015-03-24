@@ -6,14 +6,25 @@
  * Time: 10:56
  */
 /**
+ * Controls the IpWebcam and creates a Panorama image
+ *
+ * This file is intended to be triggered by a php console command cronjob for every 60 seconds
+ * Refer to crontab manual or its corresponding windows alternative
+ *
  * $move_home reset the cam position
  * $move_left $move_right
  * $get_snapshot gets the picture
  */
 include 'config.php';
+
+/**
+ * moves and controlls the cam
+ *
+ * It creates 5 pictures and puts them into tmp folder for further processing
+ */
 function get_snapshots(){
 
-    move_home();
+    move_home(0);
     move_left(2);
     take_snapshot("tmp/west.jpg");
     move_right(1);
@@ -24,8 +35,14 @@ function get_snapshots(){
     take_snapshot("tmp/northeast.jpg");
     move_right(1);
     take_snapshot("tmp/east.jpg");
-    move_home();
+    move_home(0);
 }
+
+/**
+ * Creates the panorama picture
+ *
+ * It stitches the pictures from the tmp folder together to create a sub standard panorama picture
+ */
 function create_panorama(){
     $west = imagecreatefromjpeg('tmp/west.jpg');
     $west_with = imagesx($west);
@@ -67,5 +84,7 @@ function create_panorama(){
     imagejpeg($panorama,'panorama.jpg');
 
 }
-//get_snapshots();
+if ($ip = '127.0.0.1'){
+    get_snapshots();
+}
 create_panorama();
